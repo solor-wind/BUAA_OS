@@ -11,7 +11,7 @@ done
 gcc test/code/*.o -o test/hello
 test/hello 2> test/err.txt
 mv test/err.txt ./err.txt
-chmod 6451 err.txt
+chmod 645 err.txt
 if (($# == 0))
 then
     sed -n '2p' err.txt >&2
