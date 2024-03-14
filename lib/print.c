@@ -82,7 +82,10 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 				num = va_arg(ap, int);
 			}
 			if(num<0)
+			{
 				neg_flag=1;
+				num=-num;
+			}
 			print_num(out, data, num, 10, neg_flag, width, ladjust, padc, 0);
 			/*
 			 * Refer to other parts (case 'b', case 'o', etc.) and func 'print_num' to
