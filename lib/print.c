@@ -58,8 +58,10 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 		/* Exercise 1.4: Your code here. (7/8) */
 		long_flag=0;
 		if(*fmt=='l')
+		{
 			long_flag=1;
-		fmt++;
+			fmt++;
+		}
 
 		neg_flag = 0;
 		switch (*fmt) {
