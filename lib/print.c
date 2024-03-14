@@ -48,7 +48,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 		/* get width */
 		/* Exercise 1.4: Your code here. (6/8) */
 		width=0;
-		while(*fmt>='0'&&*fmt<=9)
+		while(*fmt>='0'&&*fmt<='9')
 		{
 			width*=10;
 			width+=*fmt-'0';
