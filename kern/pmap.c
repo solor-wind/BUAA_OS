@@ -103,14 +103,14 @@ void page_init(void) {
 	/* Step 3: Mark all memory below `freemem` as used (set `pp_ref` to 1) */
 	/* Exercise 2.3: Your code here. (3/4) */
 	struct Page* pageptr=pages;
-	for(;page2pa(pageptr)<freemem;pageptr++)
+	for(;page2kva(pageptr)<freemem;pageptr++)
 	{
 		pageptr->pp_ref=1;
 	}
 
 	/* Step 4: Mark the other memory as free. */
 	/* Exercise 2.3: Your code here. (4/4) */
-	for(;pageptr-pages<npage;pageptr++)
+	for(;page2pa(pageptr)<memsize;pageptr++)
 	{
 		pageptr->pp_ref=0;
 		LIST_INSERT_HEAD(&page_free_list,pageptr,pp_link);
@@ -146,7 +146,7 @@ int page_alloc(struct Page **new) {
 	/* Step 2: Initialize this page with zero.
 	 * Hint: use `memset`. */
 	/* Exercise 2.4: Your code here. (2/2) */
-	memset(pp,0,PAGE_SIZE);
+	memset(page2kva(pp),0,PAGE_SIZE);
 
 	*new = pp;
 	return 0;
