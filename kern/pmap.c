@@ -137,7 +137,7 @@ int page_alloc(struct Page **new) {
 	/* Exercise 2.4: Your code here. (1/2) */
 	if(LIST_EMPTY(&page_free_list))
 	{
-		return -1;
+		return -E_NO_MEM;
 	}
 	pp=LIST_FIRST(&page_free_list);
 
