@@ -146,7 +146,7 @@ int page_alloc(struct Page **new) {
 	/* Step 2: Initialize this page with zero.
 	 * Hint: use `memset`. */
 	/* Exercise 2.4: Your code here. (2/2) */
-	memset(page2kva(pp),0,PAGE_SIZE);
+	memset((void*)page2kva(pp),0,PAGE_SIZE);
 
 	*new = pp;
 	return 0;
@@ -206,7 +206,7 @@ static int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte) {
 			if(tmp<0)
 				return tmp;
 			pp->pp_ref++;
-			*pgdir_entryp=(page2pa(pp))|PTE_V|PTE_D;
+			*pgdir_entryp=(page2pa(pp))|PTE_C_CACHEABLE|PTE_V;
 		}
 		else
 		{
@@ -217,7 +217,7 @@ static int pgdir_walk(Pde *pgdir, u_long va, int create, Pte **ppte) {
 
 	/* Step 3: Assign the kernel virtual address of the page table entry to '*ppte'. */
 	/* Exercise 2.6: Your code here. (3/3) */
-	*ppte=KADDR(PTE_ADDR(*pgdir_entryp))+PTX(va);
+	*ppte=(Pte*)KADDR(PTE_ADDR(*pgdir_entryp))+PTX(va);
 
 	return 0;
 }
@@ -257,7 +257,7 @@ int page_insert(Pde *pgdir, u_int asid, struct Page *pp, u_long va, u_int perm) 
 	/* Step 3: Re-get or create the page table entry. */
 	/* If failed to create, return the error. */
 	/* Exercise 2.7: Your code here. (2/3) */
-	int tmp=pgdir_walk(pgdir, va, 0, &pte);
+	int tmp=pgdir_walk(pgdir, va, 1, &pte);
 	if (tmp<0) 
 		return tmp; 
 
