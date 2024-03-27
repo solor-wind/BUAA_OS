@@ -275,3 +275,90 @@ void print_num(fmt_callback_t out, void *data, unsigned long u, int base, int ne
 
 	out(data, buf, length);
 }
+
+// lib/print.c
+int vscanfmt(scan_callback_t in, void *data, const char *fmt, va_list ap) {
+	int *ip;
+	char *cp;
+	char ch;
+	int base, num, neg, ret = 0;
+
+	while (*fmt) {
+		if (*fmt == '%') {
+			ret++;
+			fmt++; // 跳过 '%'
+			do {
+				in(data, &ch, 1);
+			} while (ch == ' ' || ch == '\t' || ch == '\n'); // 跳过空白符
+			// 注意，此时 ch 为第一个有效输入字符
+			switch (*fmt) {
+			case 'd': // 十进制
+				// Lab 1-Extra: Your code here. (2/5)
+				{
+					long num=0;
+					int neg_flag=1;
+					if(ch=='-')
+					{
+						neg_flag=-1;
+						in(data, &ch, 1);
+					}
+					while(ch>='0'&&ch<='9')
+					{
+						num*=10;
+						num+=ch-'0';
+						in(data, &ch, 1);
+					}
+					ip=va_arg(ap,int*);
+					*ip=num*neg_flag;
+				}
+				ret++;
+				break;
+			case 'x': // 十六进制
+				// Lab 1-Extra: Your code here. (3/5)
+				{
+					long num=0;
+					int neg_flag=1;
+					if(ch=='-')
+					{
+						neg_flag=-1;
+						in(data, &ch, 1);
+					}
+					while((ch>='0'&&ch<='9')||(ch>='a'&&ch<='z'))
+					{
+						num*=16;
+						if(ch>='0'&&ch<='9')
+							num+=ch-'0';
+						else
+							num+=ch-'a'+10;
+						in(data, &ch, 1);
+					}
+					ip=va_arg(ap,int*);
+					*ip=num*neg_flag;
+				}
+				ret++;
+				break;
+			case 'c':
+				// Lab 1-Extra: Your code here. (4/5)
+				cp=va_arg(ap,char*);
+				*cp=ch;
+				in(data, &ch, 1);
+				ret++;
+				break;
+			case 's':
+				// Lab 1-Extra: Your code here. (5/5)
+				cp=va_arg(ap,char*);
+				while(ch!=' '&&ch!='\t'&&ch!='\n')
+				{
+					*cp=ch;
+					cp++;
+					in(data, &ch, 1);
+				}
+				*cp='\0';
+				ret++;
+				break;
+			}
+			fmt++;
+		}
+	}
+	return ret;
+}
