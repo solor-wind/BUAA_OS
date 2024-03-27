@@ -112,6 +112,7 @@ void vprintfmt(fmt_callback_t out, void *data, const char *fmt, va_list ap) {
 				print_num(out, data, x, 10, neg_flag, width, ladjust, padc, 0);		
 
 				out(data,",",1);
+				neg_flag=0;
 				if (long_flag) {
 					y = va_arg(ap, long int);
 				} else {
