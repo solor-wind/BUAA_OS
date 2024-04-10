@@ -586,7 +586,7 @@ void buddy_free(struct Page *pp, int npp) {
 	}
 	else
 	{
-		if((u_long)pp%(2*PAGE_SIZE)==0)
+		if(page2pa(pp)%(2*PAGE_SIZE)==0)
 		{
 			struct Page* buddy_pp;
 			int flag=0;
