@@ -590,7 +590,7 @@ void buddy_free(struct Page *pp, int npp) {
 		pp+=2;
 		npp-=2;
 	}
-	if(npp)
+	if(npp==0)
 	{
 		;//LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
 	}
