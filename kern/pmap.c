@@ -580,9 +580,19 @@ int buddy_alloc(u_int size, struct Page **new) {
 
 void buddy_free(struct Page *pp, int npp) {
 	/* Your Code Here (2/2) */
-	if(npp>1)
+	/*if(npp>1)
 	{
 		LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
+	}*/
+	while(npp>=2)
+	{
+		LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
+		pp+=2;
+		npp-=2;
+	}
+	if(npp)
+	{
+		;//LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
 	}
 	else
 	{
