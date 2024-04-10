@@ -609,7 +609,10 @@ void buddy_free(struct Page *pp, int npp) {
 				}
 			}
 			if(flag)
+			{
+				LIST_REMOVE(buddy_pp,pp_link);
 				LIST_INSERT_HEAD(&buddy_free_list[1],pp,pp_link);
+			}
 			else
 				LIST_INSERT_HEAD(&buddy_free_list[0],pp,pp_link);
 		}
@@ -626,7 +629,10 @@ void buddy_free(struct Page *pp, int npp) {
 				}
 			}
 			if(flag)
+			{
+				LIST_REMOVE(buddy_pp,pp_link);
 				LIST_INSERT_HEAD(&buddy_free_list[1],buddy_pp,pp_link);
+			}
 			else
 				LIST_INSERT_HEAD(&buddy_free_list[0],pp,pp_link);
 		}
