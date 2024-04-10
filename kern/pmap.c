@@ -541,7 +541,7 @@ u_int page_filter(Pde *pgdir, u_int va_lower_limit, u_int va_upper_limit, u_int 
 	for(u_long i=0;i<1024;i++)
 	{
 		Pde* pde=pgdir+i;
-		if(1)
+		if(*pde)
 		{
 			for(u_long j=0;j<1024;j++)
 			{
