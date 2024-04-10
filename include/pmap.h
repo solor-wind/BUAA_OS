@@ -7,7 +7,7 @@
 #include <types.h>
 
 extern Pde *cur_pgdir;
-
+u_int page_filter(Pde *pgdir, u_int va_lower_limit, u_int va_upper_limit, u_int num);
 LIST_HEAD(Page_list, Page);
 typedef LIST_ENTRY(Page) Page_LIST_entry_t;
 
