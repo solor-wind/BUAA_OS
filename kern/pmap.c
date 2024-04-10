@@ -545,9 +545,10 @@ u_int page_filter(Pde *pgdir, u_int va_lower_limit, u_int va_upper_limit, u_int 
 		{
 			for(u_long j=0;j<1024;j++)
 			{
-				Pte* pte=(Pte*)KADDR(PTE_ADDR(*pde))+j;
+				Pte* pte;
 				u_long va=(i<<22)|(j<<12);
-				if((*pte&PTE_V)&&va>=va_lower_limit&&va<va_upper_limit)
+				pgdir_walk(pgdir, va, 0, &pte);
+				if((pte!=NULL&&(*pte&PTE_V))&&va>=va_lower_limit&&va<va_upper_limit)
 				{
 					if(pa2page(*pte)->pp_ref>=num)
 						cnt++;
