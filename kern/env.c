@@ -95,7 +95,7 @@ u_int mkenvid(struct Env *e) {
 
 /* Overview:
  *   Convert an existing 'envid' to an 'struct Env *'.
- *   If 'envid' is 0, set '*penv = curenv', otherwise set '*penv = &envs[ENVX(envid)]'.
+ *   If 'envid' is 0, set '*penv = curenv', oftherwise set '*penv = &envs[ENVX(envid)]'.
  *   In addition, if 'checkperm' is non-zero, the requested env must be either 'curenv' or its
  *   immediate child.
  *

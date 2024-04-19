@@ -97,9 +97,12 @@ int sys_set_tlb_mod_entry(u_int envid, u_int func) {
 
 	/* Step 1: Convert the envid to its corresponding 'struct Env *' using 'envid2env'. */
 	/* Exercise 4.12: Your code here. (1/2) */
+	if(envid2env(envid,&env,1))
+		return -E_BAD_ENV;
 
 	/* Step 2: Set its 'env_user_tlb_mod_entry' to 'func'. */
 	/* Exercise 4.12: Your code here. (2/2) */
+	env->env_user_tlb_mod_entry=func;
 
 	return 0;
 }
@@ -151,7 +154,7 @@ int sys_mem_alloc(u_int envid, u_int va, u_int perm) {
 
 	/* Step 3: Allocate a physical page using 'page_alloc'. */
 	/* Exercise 4.4: Your code here. (3/3) */
-	page_alloc(&pp);
+	try(page_alloc(&pp));
 
 	/* Step 4: Map the allocated page at 'va' with permission 'perm' using 'page_insert'. */
 	return page_insert(env->env_pgdir, env->env_asid, pp, va, perm);
@@ -195,7 +198,7 @@ int sys_mem_map(u_int srcid, u_int srcva, u_int dstid, u_int dstva, u_int perm) 
 	/* Step 4: Find the physical page mapped at 'srcva' in the address space of 'srcid'. */
 	/* Return -E_INVAL if 'srcva' is not mapped. */
 	/* Exercise 4.5: Your code here. (4/4) */
-	pp=page_lookup(srcenv->env_pgdir,srcva,NULL);
+	pp=page_lookup(srcenv->env_pgdir,ROUNDDOWN(srcva,PAGE_SIZE),NULL);
 	if(pp==NULL)
 		return -E_INVAL;
 
@@ -250,15 +253,21 @@ int sys_exofork(void) {
 
 	/* Step 1: Allocate a new env using 'env_alloc'. */
 	/* Exercise 4.9: Your code here. (1/4) */
+	env_alloc(&e,curenv->env_id);
 
 	/* Step 2: Copy the current Trapframe below 'KSTACKTOP' to the new env's 'env_tf'. */
 	/* Exercise 4.9: Your code here. (2/4) */
+	//e->env_tf=*((struct Trapframe*)(KSTACKTOP-sizeof(struct Trapframe)));
+	memcpy(&(e->env_tf), (void*)(KSTACKTOP - sizeof(struct Trapframe)), sizeof(struct Trapframe));
 
 	/* Step 3: Set the new env's 'env_tf.regs[2]' to 0 to indicate the return value in child. */
 	/* Exercise 4.9: Your code here. (3/4) */
+	e->env_tf.regs[2]=0;
 
 	/* Step 4: Set up the new env's 'env_status' and 'env_pri'.  */
 	/* Exercise 4.9: Your code here. (4/4) */
+	e->env_status=ENV_NOT_RUNNABLE;
+	e->env_pri=curenv->env_pri;
 
 	return e->env_id;
 }
@@ -280,12 +289,24 @@ int sys_set_env_status(u_int envid, u_int status) {
 
 	/* Step 1: Check if 'status' is valid. */
 	/* Exercise 4.14: Your code here. (1/3) */
+	if(!(status==ENV_RUNNABLE||status==ENV_NOT_RUNNABLE))
+		return -E_INVAL;
 
 	/* Step 2: Convert the envid to its corresponding 'struct Env *' using 'envid2env'. */
 	/* Exercise 4.14: Your code here. (2/3) */
+	if(envid2env(envid,&env,1))
+		return -E_BAD_ENV;
 
 	/* Step 3: Update 'env_sched_list' if the 'env_status' of 'env' is being changed. */
 	/* Exercise 4.14: Your code here. (3/3) */
+	if(env->env_status==ENV_RUNNABLE&&status==ENV_NOT_RUNNABLE)
+	{
+		TAILQ_REMOVE(&env_sched_list,env,env_sched_link);
+	}
+	else if(env->env_status==ENV_NOT_RUNNABLE&&status==ENV_RUNNABLE)
+	{
+		TAILQ_INSERT_TAIL(&env_sched_list,env,env_sched_link);
+	}
 
 	/* Step 4: Set the 'env_status' of 'env'. */
 	env->env_status = status;
@@ -416,9 +437,11 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	/* Return -E_INVAL if 'srcva' is not zero and not mapped in 'curenv'. */
 	if (srcva != 0) {
 		/* Exercise 4.8: Your code here. (8/8) */
-		if(sys_mem_map(envid,srcva,e->env_id,e->env_ipc_dstva,perm))
+		p=page_lookup(curenv->env_pgdir,srcva,NULL);
+		if(p==NULL)
 			return -E_INVAL;
-
+		if(page_insert(e->env_pgdir,e->env_asid,p,e->env_ipc_dstva,perm))
+			return -E_INVAL;
 	}
 	return 0;
 }
