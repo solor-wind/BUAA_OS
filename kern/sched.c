@@ -18,6 +18,11 @@ void schedule(int yield) {
 	static int count = 0; // remaining time slices of current env
 	struct Env *e = curenv;
 
+	if(e!=NULL){
+		struct Trapframe *tf=((struct Trapframe *)KSTACKTOP - 1);
+		e->env_clocks=tf->cp0_count;
+	}
+
 	/* We always decrease the 'count' by 1.
 	 *
 	 * If 'yield' is set, or 'count' has been decreased to 0, or 'e' (previous 'curenv') is

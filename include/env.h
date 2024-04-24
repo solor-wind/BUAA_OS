@@ -39,6 +39,7 @@ struct Env {
 	// Lab 6 scheduler counts
 	u_int env_runs; // number of times we've been env_run'ed
 	u_int env_scheds;
+	u_long env_clocks;
 };
 
 void env_stat(struct Env *e, u_int *pri, u_int *scheds, u_int *runs, u_int *clocks);

@@ -590,6 +590,7 @@ void env_stat(struct Env *e, u_int *pri, u_int *scheds, u_int *runs, u_int *cloc
 	*pri=e->env_pri;
 	*runs=e->env_runs;
 	*scheds=e->env_scheds;
-	struct Trapframe *tf=((struct Trapframe *)KSTACKTOP - 1);
-	*clocks=tf->cp0_count;
+	//struct Trapframe *tf=((struct Trapframe *)KSTACKTOP - 1);
+	//*clocks=tf->cp0_count;
+	*clocks=e->env_clocks;
 }
