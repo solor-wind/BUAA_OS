@@ -47,6 +47,7 @@ void schedule(int yield) {
 		if(e!=NULL)
 		{
 			count=e->env_pri-1;
+			e->env_scheds++;
 			env_run(e);
 		}
 		else

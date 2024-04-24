@@ -14,7 +14,6 @@
 #define ENV_FREE 0
 #define ENV_RUNNABLE 1
 #define ENV_NOT_RUNNABLE 2
-
 // Control block of an environment (process).
 struct Env {
 	struct Trapframe env_tf;	 // saved context (registers) before switching
@@ -39,8 +38,10 @@ struct Env {
 
 	// Lab 6 scheduler counts
 	u_int env_runs; // number of times we've been env_run'ed
+	u_int env_scheds;
 };
 
+void env_stat(struct Env *e, u_int *pri, u_int *scheds, u_int *runs, u_int *clocks);
 LIST_HEAD(Env_list, Env);
 TAILQ_HEAD(Env_sched_list, Env);
 extern struct Env *curenv;		     // the current env
