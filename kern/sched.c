@@ -20,7 +20,7 @@ void schedule(int yield) {
 
 	if(e!=NULL){
 		struct Trapframe *tf=((struct Trapframe *)KSTACKTOP - 1);
-		e->env_clocks=tf->cp0_count;
+		e->env_clocks+=tf->cp0_count;
 	}
 
 	/* We always decrease the 'count' by 1.
