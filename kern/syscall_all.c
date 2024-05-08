@@ -531,7 +531,7 @@ int sys_msg_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 	m->msg_tier++;
 	m->msg_status=MSG_SENT;
 	m->msg_value=value;
-	m->msg_from=envid;
+	m->msg_from=curenv->env_id;
 	m->msg_perm=perm|PTE_V;
 
 	if(srcva)
