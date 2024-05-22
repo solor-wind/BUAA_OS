@@ -511,7 +511,28 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 
 	return 0;
 }
+int sys_clone(){
+	if(curenv->env_pgdir[KSEG0>>22]>=64){
+		return -E_ACT_ENV_NUM_EXCEED;
+	}
+	struct Env *e;
+	env_clone(e);
 
+	memcpy(&(e->env_tf), (void*)(KSTACKTOP - sizeof(struct Trapframe)), sizeof(struct Trapframe));
+
+	/* Step 3: Set the new env's 'env_tf.regs[2]' to 0 to indicate the return value in child. */
+	/* Exercise 4.9: Your code here. (3/4) */
+	e->env_tf.regs[2]=0;
+
+	/* Step 4: Set up the new env's 'env_status' and 'env_pri'.  */
+	/* Exercise 4.9: Your code here. (4/4) */
+	e->env_status=ENV_RUNNABLE;
+	e->env_pri=curenv->env_pri;
+
+	TAILQ_INSERT_TAIL(&env_sched_list,e,env_sched_link);
+
+	return e->env_id;
+}
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,

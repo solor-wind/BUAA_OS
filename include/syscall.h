@@ -23,6 +23,7 @@ enum {
 	SYS_write_dev,
 	SYS_read_dev,
 	MAX_SYSNO,
+	SYS_clone,
 };
 
 #endif

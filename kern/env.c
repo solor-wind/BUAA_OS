@@ -217,6 +217,59 @@ static int env_setup_vm(struct Env *e) {
 	/* Step 3: Map its own page table at 'UVPT' with readonly permission.
 	 * As a result, user programs can read its page table through 'UVPT' */
 	e->env_pgdir[PDX(UVPT)] = PADDR(e->env_pgdir) | PTE_V;
+	e->env_pgdir[KSEG0>>22]=1;
+	return 0;
+}
+
+int env_clone(struct Env **new, u_int parent_id) {
+	int r;
+	struct Env *e;
+
+	/* Step 1: Get a free Env from 'env_free_list' */
+	/* Exercise 3.4: Your code here. (1/4) */
+	e=LIST_FIRST(&env_free_list);
+	if(e==NULL)
+	{
+		return -E_NO_FREE_ENV;
+	}
+
+	/* Step 2: Call a 'env_setup_vm' to initialize the user address space for this new Env. */
+	/* Exercise 3.4: Your code here. (2/4) */
+	//env_setup_vm(e);
+
+	/* Step 3: Initialize these fields for the new Env with appropriate values:
+	 *   'env_user_tlb_mod_entry' (lab4), 'env_runs' (lab6), 'env_id' (lab3), 'env_asid' (lab3),
+	 *   'env_parent_id' (lab3)
+	 *
+	 * Hint:
+	 *   Use 'asid_alloc' to allocate a free asid.
+	 *   Use 'mkenvid' to allocate a free envid.
+	 */
+	e->env_user_tlb_mod_entry = 0; // for lab4
+	e->env_runs = 0;	       // for lab6
+	/* Exercise 3.4: Your code here. (3/4) */
+	e->env_id=mkenvid(e);
+	struct Env *pe;
+	envid2env(parent_id,&pe,0);
+	e->env_asid=pe->env_asid;
+	e->env_pgdir=pe->env_pgdir;
+	pe->env_pgdir[KSEG0>>22]++;
+	e->env_parent_id=parent_id;
+
+	/* Step 4: Initialize the sp and 'cp0_status' in 'e->env_tf'.
+	 *   Set the EXL bit to ensure that the processor remains in kernel mode during context
+	 * recovery. Additionally, set UM to 1 so that when ERET unsets EXL, the processor
+	 * transitions to user mode.
+	 */
+	e->env_tf.cp0_status = STATUS_IM7 | STATUS_IE | STATUS_EXL | STATUS_UM;
+	// Reserve space for 'argc' and 'argv'.
+	e->env_tf.regs[29] = USTACKTOP - sizeof(int) - sizeof(char **);
+
+	/* Step 5: Remove the new Env from env_free_list. */
+	/* Exercise 3.4: Your code here. (4/4) */
+	LIST_REMOVE(e,env_link);
+
+	*new = e;
 	return 0;
 }
 
@@ -401,6 +454,11 @@ struct Env *env_create(const void *binary, size_t size, int priority) {
  *  Free env e and all memory it uses.
  */
 void env_free(struct Env *e) {
+	if(e->env_pgdir[KSEG0>>22]>1)
+	{
+		e->env_pgdir[KSEG0>>22]--;
+		return;
+	}
 	Pte *pt;
 	u_int pdeno, pteno, pa;
 
