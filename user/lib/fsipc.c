@@ -144,7 +144,7 @@ int fsipc_copy(const char *src_path, const char *dst_path) {
    {
 		return -E_BAD_PATH;
    }
-   else if(strlen(src_path)>MAXPATHLEN||strlen(dst_path)>MAXPATHLEN)
+   else if(strlen(src_path)>=MAXPATHLEN||strlen(dst_path)>=MAXPATHLEN)
    {
 		return -E_BAD_PATH;
    }
