@@ -831,6 +831,7 @@ int copy_file_content(struct File *src, struct File *dst) {
 		if(r<0)
 			return r;
 		memcpy(dst_blk,src_blk,BLOCK_SIZE);
+		file_dirty(dst,i);
 		/*
 		struct File *files = (struct File *)blk;
 		// Find the target among all 'File's in this block.
