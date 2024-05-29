@@ -824,10 +824,10 @@ int copy_file_content(struct File *src, struct File *dst) {
    nblock = ROUND(src->f_size, BLOCK_SIZE) / BLOCK_SIZE;
    for (u_int i = 0; i < nblock; i++) {
       // Lab 5-2-Exam: Your code here. (3/6)
-		r=file_get_block(src->f_dir,i,&src_blk);
+		r=file_get_block(src,i,&src_blk);
 		if(r<0)
 			return r;
-		r=file_get_block(dst->f_dir,i,&dst_blk);
+		r=file_get_block(dst,i,&dst_blk);
 		if(r<0)
 			return r;
 		memcpy(dst_blk,src_blk,BLOCK_SIZE);
