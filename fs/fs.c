@@ -162,7 +162,7 @@ void unmap_block(u_int blockno) {
 	// first.
 	// Hint: Use 'block_is_free', 'block_is_dirty' to check, and 'write_block' to sync.
 	/* Exercise 5.7: Your code here. (4/5) */
-	if(block_is_free(blockno)&&block_is_dirty(blockno))
+	if(!block_is_free(blockno)&&block_is_dirty(blockno))
 		write_block(blockno);
 
 	// Step 3: Unmap the virtual address via syscall.
