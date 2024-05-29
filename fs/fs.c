@@ -887,6 +887,7 @@ int copy_directory_contents(struct File *src, struct File *dst) {
 		 {
 			copy_directory_contents(&dir_content[j],dst_file);
 		 }
+		 file_dirty(dst,i);
 
       }
    }
