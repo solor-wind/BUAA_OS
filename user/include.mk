@@ -29,6 +29,9 @@ ifeq ($(call lab-ge,6), true)
 
 	USERLIB      += wait.o spawn.o pipe.o
 	USERAPPS     := num.b  \
+			touch.b \
+			mkdir.b \
+			rm.b \
 			echo.b \
 			halt.b \
 			ls.b \

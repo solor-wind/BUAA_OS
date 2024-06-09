@@ -39,6 +39,9 @@ int open(const char *path, int mode) {
 	// Step 2: Prepare the 'fd' using 'fsipc_open' in fsipc.c.
 	/* Exercise 5.9: Your code here. (2/5) */
 	r=fsipc_open(path,mode,fd);
+	if(mode&O_TYPE){
+		return r;
+	}
 	if(r<0)
 		return r;
 

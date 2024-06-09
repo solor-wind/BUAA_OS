@@ -281,6 +281,14 @@ int main(int argc, char **argv) {
 			user_panic("fork: %d", r);
 		}
 		if (r == 0) {
+			for(int i=0;buf[i];i++)
+			{
+				if(buf[i]=='#')
+				{
+					buf[i]='\0';
+					break;
+				}
+			}
 			runcmd(buf);
 			exit();
 		} else {
