@@ -71,6 +71,7 @@ int parsecmd(char **argv, int *rightpipe) {
 		char *t;
 		int fd, r;
 		int c = gettoken(0, &t);
+		char ch;
 		switch (c) {
 		case 0:
 			return argc;
@@ -104,7 +105,8 @@ int parsecmd(char **argv, int *rightpipe) {
 
 			break;
 		case '>':
-			if (gettoken(0, &t) != 'w') {
+			ch=gettoken(0, &t);
+			if (ch != 'w'&&ch!='>') {
 				debugf("syntax error: > not followed by word\n");
 				exit();
 			}
@@ -114,7 +116,16 @@ int parsecmd(char **argv, int *rightpipe) {
 			// utilize 'debugf' to print relevant messages,
 			// and subsequently terminate the process using 'exit'.
 			/* Exercise 6.5: Your code here. (2/3) */
-			fd=open(t,O_WRONLY);
+			if(ch=='>'){
+				ch=gettoken(0, &t);
+				if (ch != 'w') {
+					debugf("syntax error: > not followed by word\n");
+					exit();
+				}
+				fd=open(t,O_RWR|O_WRONLY);
+			}else{
+				fd=open(t,O_WRONLY);
+			}
 			if(fd<0)
 			{
 				debugf("syntax error: > can't open file\n");
