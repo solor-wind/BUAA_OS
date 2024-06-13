@@ -4,6 +4,7 @@
 #define WHITESPACE " \t\r\n"
 #define SYMBOLS "<|>&;()"
 
+void runcmd(char* s);
 /* Overview:
  *   Parse the next token from the string at s.
  *
@@ -58,6 +59,45 @@ int _gettoken(char *s, char **p1, char **p2) {
 			}
 			s[i]='\0';
 			s+=flag-1;
+		}else if(*s=='`'){
+			char cmd[1024];
+			char cmdans[1024];
+			char after[1024];
+			for(int i=1;s[i];i++){
+				if(s[i]=='`'){
+					cmd[i-1]='\0';
+					strcpy(after,s+i+1);
+					break;
+				}else{
+					cmd[i-1]=s[i];
+				}
+			}
+			int p[2];
+			pipe(p);
+			int r=fork();
+			if(r==0)
+			{
+				dup(p[1],1);
+				close(p[0]);
+				close(p[1]);
+				runcmd(cmd);
+				exit();
+			}
+			else
+			{
+				close(p[1]);
+				int len,pos=0;
+				char tmp[1024];
+				while((len=read(p[0],tmp,1024))>0){
+					tmp[len]='\0';
+					strcpy(cmdans+pos,tmp);
+					pos+=len;
+				}
+				close(p[0]);
+			}
+			strcpy(s,cmdans);
+			strcpy(s+strlen(cmdans),after);
+			s+=strlen(cmdans)-1;
 		}
 		s++;
 	}
