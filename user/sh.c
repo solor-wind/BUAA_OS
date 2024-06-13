@@ -29,18 +29,6 @@ int _gettoken(char *s, char **p1, char **p2) {
 	while (strchr(WHITESPACE, *s)) {
 		*s++ = 0;
 	}
-		
-	if(*s=='\"'){
-		*s++=0;
-		*p1 = s;
-		while (*s && *s!='\"') {
-			//printf("%c",*s);
-			s++;
-		}
-		*s++=0;
-		*p2 = s;
-		return 'w';
-	}
 	
 	if (*s == 0) {
 		return 0;
@@ -56,6 +44,21 @@ int _gettoken(char *s, char **p1, char **p2) {
 
 	*p1 = s;
 	while (*s && !strchr(WHITESPACE SYMBOLS, *s)) {
+		if(*s=='\"'){
+			char tmp[1024];
+			strcpy(tmp,s+1);
+			int i=0,j=0,flag=0;
+			for(;tmp[j];j++){
+				if(tmp[j]=='\"'){
+					flag=j;
+					continue;
+				}else{
+					s[i++]=tmp[j];
+				}
+			}
+			s[i]='\0';
+			s+=flag-1;
+		}
 		s++;
 	}
 	*p2 = s;
