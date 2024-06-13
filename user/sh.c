@@ -49,7 +49,7 @@ int _gettoken(char *s, char **p1, char **p2) {
 			strcpy(tmp,s+1);
 			int i=0,j=0,flag=0;
 			for(;tmp[j];j++){
-				if(tmp[j]=='\"'){
+				if(tmp[j]=='\"'&&!flag){
 					flag=j;
 					continue;
 				}else{
