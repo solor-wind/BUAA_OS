@@ -166,6 +166,19 @@ int parsecmd(char **argv, int *rightpipe) {
 			//user_panic("| not implemented");
 
 			break;
+		case ';':
+			r=fork();
+			*rightpipe=r;
+			if(r==0)
+			{
+				return argc;
+			}
+			else
+			{
+				wait(r);
+				return parsecmd(argv, rightpipe);
+			}
+			break;
 		}
 	}
 
