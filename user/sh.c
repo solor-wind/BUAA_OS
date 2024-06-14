@@ -234,11 +234,11 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			// 	*post&=~8;
 			ch=gettoken(0, &t);
 			if (ch == '|') {
-				if(dupflag){
-					dup(0,1);
-				}else{
-					dup(1,0);
-				}
+				// if(dupflag){
+				// 	dup(0,1);
+				// }else{
+				// 	dup(1,0);
+				// }
 				r=fork();
 				*rightpipe=r;
 				if(r==0)
@@ -329,11 +329,11 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			// else
 			// 	*post&=~4;
 			if (ch == '&') {
-				if(dupflag){
-					dup(0,1);
-				}else{
-					dup(1,0);
-				}
+				// if(dupflag){
+				// 	dup(0,1);
+				// }else{
+				// 	dup(1,0);
+				// }
 				r=fork();
 				*rightpipe=r;
 				if(r==0)
