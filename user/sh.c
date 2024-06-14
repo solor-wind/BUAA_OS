@@ -260,9 +260,11 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 								exit();
 							}else if(ch=='&'){
 								ch=gettoken(0, &t);
-								if(ch!='&'){
+								if(ch!='&'&&ch!=';'){
 									continue;
 								}
+								return parsecmd(argv, rightpipe,post);
+							}else if(ch==';'){
 								return parsecmd(argv, rightpipe,post);
 							}
 						}
@@ -270,7 +272,7 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 				}
 			}
 			if(ch!='w'){
-				debugf("syntax error: > can't open file\n");
+				debugf("syntax error: | can't open file\n");
 				close_all();
 				exit();
 			}
@@ -359,14 +361,21 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 							}else if(ch=='|'){
 								//*post|=8;
 								ch=gettoken(0, &t);
-								if(ch!='|'){
+								if(ch!='|'&&ch!=';'){
 									continue;
 								}
+								return parsecmd(argv, rightpipe,post);
+							}else if(ch==';'){
 								return parsecmd(argv, rightpipe,post);
 							}
 						}
 					}
 				}
+			}
+			if(ch!=0){
+				debugf("syntax error: &?\n");
+				close_all();
+				exit();
 			}
 			r=fork();
 			*rightpipe=r;
