@@ -188,9 +188,9 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 					debugf("syntax error: > not followed by word\n");
 					exit();
 				}
-				fd=open(t,O_RWR|O_WRONLY);
+				fd=open(t,O_RWR|O_WRONLY|O_CREAT);
 			}else{
-				fd=open(t,O_WRONLY|O_TRUNC);
+				fd=open(t,O_WRONLY|O_TRUNC|O_CREAT);
 			}
 			if(fd<0)
 			{
