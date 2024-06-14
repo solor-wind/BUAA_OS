@@ -72,4 +72,23 @@ void envid2env_check(void);
 		env_create(binary_##x##_start, (u_int)binary_##x##_size, 1);                       \
 	})
 
+#define MAXJOB 1024
+#define Running 0
+#define Done 1
+
+struct Job
+{
+	int job_id;
+	int status;
+	int env_id;
+	char cmd[1025];
+};
+
+int add_job(int envid,char cmd[]);
+int set_job_status(int job_id,int status);
+int get_job(int envid);
+int get_job_envid(int job_id);
+int get_jobs(struct Job usrjobs[]);
+int print_jobs();
+
 #endif // !_ENV_H_

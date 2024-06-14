@@ -76,3 +76,31 @@ int syscall_read_dev(void *va, u_int dev, u_int size) {
 	return msyscall(SYS_read_dev,va,dev,size);
 
 }
+
+int syscall_add_job(int envid,char cmd[]) {
+	return msyscall(SYS_add_job,envid,cmd);
+}
+
+int syscall_set_job_status(int job_id,int status) {
+	return msyscall(SYS_set_job_status,job_id,status);
+}
+
+int syscall_get_job(int envid) {
+	return msyscall(SYS_get_job,envid);
+}
+
+int syscall_get_job_envid(int job_id) {
+	return msyscall(SYS_get_job_envid,job_id);
+}
+
+int syscall_get_jobs(struct Job usrjobs[]) {
+	return msyscall(SYS_get_jobs,usrjobs);
+}
+
+int syscall_print_jobs() {
+	return msyscall(SYS_print_jobs);
+}
+
+int syscall_mykill(u_int envid) {
+	return msyscall(SYS_mykill,envid);
+}

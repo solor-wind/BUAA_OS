@@ -450,6 +450,7 @@ int sys_ipc_try_send(u_int envid, u_int value, u_int srcva, u_int perm) {
 int sys_cgetc(void) {
 	int ch;
 	while ((ch = scancharc()) == 0) {
+		break;
 	}
 	return ch;
 }
@@ -536,6 +537,40 @@ int sys_read_dev(u_int va, u_int pa, u_int len) {
 	return 0;
 }
 
+int sys_add_job(int envid,char cmd[]){
+	return add_job(envid,cmd);
+}
+
+int sys_set_job_status(int job_id,int status){
+	return set_job_status(job_id,status);
+}
+
+int sys_get_job(int envid){
+	return get_job(envid);
+}
+
+int sys_get_job_envid(int job_id){
+	return get_job_envid(job_id);
+}
+
+int sys_get_jobs(struct Job usrjobs[]){
+	return get_jobs(usrjobs);
+}
+
+int sys_print_jobs(){
+	return print_jobs();
+}
+
+int sys_mykill(u_int envid) {
+	struct Env *e;
+	try(envid2env(envid, &e, 0));
+
+	printk("[%08x] destroying %08x\n", curenv->env_id, e->env_id);
+	env_destroy(e);
+	return 0;
+	//return mykill(envid);
+}
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -555,6 +590,13 @@ void *syscall_table[MAX_SYSNO] = {
     [SYS_cgetc] = sys_cgetc,
     [SYS_write_dev] = sys_write_dev,
     [SYS_read_dev] = sys_read_dev,
+	[SYS_add_job] = sys_add_job,
+	[SYS_set_job_status] = sys_set_job_status,
+	[SYS_get_job] = sys_get_job,
+	[SYS_get_job_envid] = sys_get_job_envid,
+	[SYS_get_jobs] = sys_get_jobs,
+	[SYS_print_jobs] = sys_print_jobs,
+	[SYS_mykill] = sys_mykill,
 };
 
 /* Overview:

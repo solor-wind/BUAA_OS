@@ -9,6 +9,8 @@ char histcmd[HISTFILESIZE][1024];
 int lasthist=-1;//上一条指令在哪
 char lastcmd[1024];//当前指令
 
+struct Job usrjobs[MAXJOB+1];
+
 void runcmd(char* s);
 /* Overview:
  *   Parse the next token from the string at s.
@@ -126,8 +128,9 @@ int gettoken(char *s, char **p1) {
 
 #define MAXARGS 128
 
-int parsecmd(char **argv, int *rightpipe) {
+int parsecmd(char **argv, int *rightpipe,int* post) {
 	int argc = 0;
+	int dupflag=0;
 	while (1) {
 		char *t;
 		int fd, r;
@@ -153,6 +156,7 @@ int parsecmd(char **argv, int *rightpipe) {
 			// utilize 'debugf' to print relevant messages,
 			// and subsequently terminate the process using 'exit'.
 			/* Exercise 6.5: Your code here. (1/3) */
+			dupflag=0;
 			fd=open(t,O_RDONLY);
 			if(fd<0)
 			{
@@ -177,6 +181,7 @@ int parsecmd(char **argv, int *rightpipe) {
 			// utilize 'debugf' to print relevant messages,
 			// and subsequently terminate the process using 'exit'.
 			/* Exercise 6.5: Your code here. (2/3) */
+			dupflag=1;
 			if(ch=='>'){
 				ch=gettoken(0, &t);
 				if (ch != 'w') {
@@ -224,7 +229,7 @@ int parsecmd(char **argv, int *rightpipe) {
 				dup(p[0],0);
 				close(p[0]);
 				close(p[1]);
-				return parsecmd(argv, rightpipe);
+				return parsecmd(argv, rightpipe,post);
 			}
 			else
 			{
@@ -248,9 +253,27 @@ int parsecmd(char **argv, int *rightpipe) {
 			else
 			{
 				wait(r);
-				return parsecmd(argv, rightpipe);
+				if(dupflag){
+				dup(0,1);
+				}else{
+					dup(1,0);
+				}
+				return parsecmd(argv, rightpipe,post);
 			}
 			break;
+		case '&':
+			r=fork();
+			*rightpipe=r;
+			if(r==0)
+			{
+				*post=1;
+				return argc;
+			}
+			else
+			{
+				return parsecmd(argv, rightpipe,post);
+			}
+			break;	
 		}
 	}
 
@@ -262,7 +285,9 @@ void runcmd(char *s) {
 
 	char *argv[MAXARGS];
 	int rightpipe = 0;
-	int argc = parsecmd(argv, &rightpipe);
+	int postflag=0;
+	int *post=&postflag;
+	int argc = parsecmd(argv, &rightpipe,post);
 	if (argc == 0) {
 		return;
 	}
@@ -273,10 +298,68 @@ void runcmd(char *s) {
 		char tmp[10240];
 		readn(f,tmp,10240);
 		printf("%s\n",tmp);
+		close_all();
+		exit();
+	}
+	else if(strcmp(argv[0],"jobs")==0){
+		syscall_print_jobs();
+		// int job_cnt=syscall_get_jobs(usrjobs);
+		// //printf("%d\n",job_cnt);
+		// for(int i=1;i<=job_cnt;i++){
+		// 	if(usrjobs[i].status==Running)
+		// 	printf("[%d] %-10s 0x%08x %s\n", usrjobs[i].job_id, "Running", usrjobs[i].env_id, usrjobs[i].cmd);
+		// 	else
+		// 	printf("[%d] %-10s 0x%08x %s\n", usrjobs[i].job_id, "Done", usrjobs[i].env_id, usrjobs[i].cmd);
+		// }
+		close_all();
+		exit();
+	}else if(strcmp(argv[0],"fg")==0){
+		int job_id=0;
+		for(int i=0;argv[1][i];i++){
+			if(argv[1][i]>='0'&&argv[1][i]<='9'){
+				job_id*=10;
+				job_id+=argv[1][i]-'0';
+			}
+		}
+		int envid=syscall_get_job_envid(job_id);
+		wait(envid);
+		close_all();
+		exit();
+	}else if(strcmp(argv[0],"kill")==0){
+		int job_id=0;
+		for(int i=0;argv[1][i];i++){
+			if(argv[1][i]>='0'&&argv[1][i]<='9'){
+				job_id*=10;
+				job_id+=argv[1][i]-'0';
+			}
+		}
+		int envid=syscall_get_job_envid(job_id);
+		syscall_set_job_status(job_id,Done);
+		printf("%d\n",envid);
+		if(syscall_mykill(envid)<0)
+		printf("not ok\n");
+		close_all();
 		exit();
 	}
 
 	int child = spawn(argv[0], argv);
+	if(child>0&&*post){
+		char tmp[1024];
+		int len=0;
+		for(int i=0;i<argc;i++){
+			strcpy(tmp+len,argv[i]);
+			len+=strlen(argv[i]);
+			tmp[len++]=' ';
+			tmp[len]='\0';
+		}
+		syscall_add_job(child,tmp);
+	}
+	// int job_id=syscall_get_job(env->env_id);
+	// if(job_id>0){
+	// 	syscall_set_job_status(job_id,Done);
+	// }else{
+	// 	printf("%d not ok\n",child);
+	// }
 	close_all();
 	if (child >= 0) {
 		wait(child);
@@ -356,7 +439,6 @@ void readline(char *buf, u_int n) {
 		}
 		else if(i>=2&&buf[i-2]==27&&buf[i-1]==91&&buf[i]==66){
 			i-=2;
-			//printf("%c%c%c",27,91,65);
 			for(int j=0;j<i;j++){
 				printf("\b \b");
 			}
@@ -365,7 +447,7 @@ void readline(char *buf, u_int n) {
 				lastcmd[i]='\0';
 			}
 			if(lasthist==-1){
-				lasthist==-2;
+				lasthist=-2;
 			}else{
 				if((hist==0&&lasthist==HISTFILESIZE-1)||(hist&&lasthist==hist-1)){
 					lasthist=-2;

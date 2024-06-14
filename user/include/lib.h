@@ -69,6 +69,14 @@ int syscall_cgetc(void);
 int syscall_write_dev(void *va, u_int dev, u_int len);
 int syscall_read_dev(void *va, u_int dev, u_int len);
 
+int syscall_add_job(int envid,char cmd[]);
+int syscall_set_job_status(int job_id,int status);
+int syscall_get_job(int envid);
+int syscall_get_job_envid(int job_id);
+int syscall_get_jobs(struct Job usrjobs[]);
+int syscall_print_jobs();
+int syscall_mykill(u_int envid);
+
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);
 u_int ipc_recv(u_int *whom, void *dstva, u_int *perm);

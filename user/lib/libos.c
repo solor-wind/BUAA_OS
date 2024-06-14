@@ -22,6 +22,11 @@ void libmain(int argc, char **argv) {
 	// call user main routine
 	main(argc, argv);
 
+	int job_id=syscall_get_job(env->env_id);
+	if(job_id>0){
+		syscall_set_job_status(job_id,Done);
+	}
+
 	// exit gracefully
 	exit();
 }

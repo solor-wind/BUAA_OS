@@ -18,6 +18,9 @@ static Pde *base_pgdir;
 
 static uint32_t asid_bitmap[NASID / 32] = {0};
 
+struct Job jobs[MAXJOB+1];
+int job_cnt=0;
+
 /* Overview:
  *  Allocate an unused ASID.
  *
@@ -595,4 +598,59 @@ void envid2env_check() {
 	re = envid2env(pe2->env_id, &pe, 1);
 	assert(re == -E_BAD_ENV);
 	printk("envid2env() work well!\n");
+}
+
+int add_job(int envid,char cmd[]){
+	if(job_cnt>=MAXJOB){
+		return -1;
+	}
+	job_cnt++;
+	jobs[job_cnt].job_id=job_cnt;
+	jobs[job_cnt].env_id=envid;
+	jobs[job_cnt].status=Running;
+	strcpy(jobs[job_cnt].cmd,cmd);
+	return 0;
+}
+
+int set_job_status(int job_id,int status){
+	if(job_id>0&&job_id<=job_cnt){
+		jobs[job_id].status=status;
+		return 0;
+	}else{
+		return -1;
+	}
+}
+
+int get_job(int envid){
+	for(int i=1;i<=job_cnt;i++){
+		if(jobs[i].env_id==envid){
+			return i;
+		}
+	}
+	return -1;
+}
+
+int get_job_envid(int job_id){
+	if(job_id>0&&job_id<=job_cnt){
+		return jobs[job_id].env_id;
+	}else{
+		return -1;
+	}
+}
+
+int get_jobs(struct Job usrjobs[]){
+	
+	memcpy(usrjobs,jobs,sizeof(jobs));
+
+	return job_cnt;
+}
+
+int print_jobs(){
+	for(int i=1;i<=job_cnt;i++){
+		if(jobs[i].status==Running)
+		printk("[%d] %-10s 0x%08x %s\n", jobs[i].job_id, "Running", jobs[i].env_id, jobs[i].cmd);
+		else
+		printk("[%d] %-10s 0x%08x %s\n", jobs[i].job_id, "Done", jobs[i].env_id, jobs[i].cmd);
+	}
+	return 0;
 }
