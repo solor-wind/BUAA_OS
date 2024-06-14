@@ -133,6 +133,7 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 	int dupflag=0;
 	if((*post)&2){
 		argc=1;
+		*post&=~2;
 	}
 	while (1) {
 		char *t;
@@ -222,6 +223,15 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			 * - close the read end of the pipe
 			 * - and 'return argc', to execute the left of the pipeline.
 			 */
+			// if(!((*post)&8))
+			// 	ch=gettoken(0, &t);
+			// else if((*post)&4){
+			// 	debugf("syntax error: &|\n");
+			// 	close_all();
+			// 	exit();
+			// }
+			// else
+			// 	*post&=~8;
 			ch=gettoken(0, &t);
 			if (ch == '|') {
 				if(dupflag){
@@ -243,8 +253,19 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 						return parsecmd(argv, rightpipe,post);
 					else
 					{
-						close_all();
-						exit();
+						while(1){
+							ch=gettoken(0, &t);
+							if(ch==0){
+								close_all();
+								exit();
+							}else if(ch=='&'){
+								ch=gettoken(0, &t);
+								if(ch!='&'){
+									continue;
+								}
+								return parsecmd(argv, rightpipe,post);
+							}
+						}
 					}
 				}
 			}
@@ -298,7 +319,15 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			}
 			break;
 		case '&':
-			ch=gettoken(0, &t);
+			//if(!((*post)&4))
+				ch=gettoken(0, &t);
+			// else if((*post)&8){
+			// 	debugf("syntax error: |&\n");
+			// 	close_all();
+			// 	exit();
+			// }
+			// else
+			// 	*post&=~4;
 			if (ch == '&') {
 				if(dupflag){
 					dup(0,1);
@@ -319,8 +348,23 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 						return parsecmd(argv, rightpipe,post);
 					else
 					{
-						close_all();
-						exit();
+						while(1){
+							ch=gettoken(0, &t);
+							if(ch==0){
+								close_all();
+								exit();
+							// }else if(ch=='&'){
+							// 	*post|=4;
+							// 	return parsecmd(argv, rightpipe,post);
+							}else if(ch=='|'){
+								//*post|=8;
+								ch=gettoken(0, &t);
+								if(ch!='|'){
+									continue;
+								}
+								return parsecmd(argv, rightpipe,post);
+							}
+						}
 					}
 				}
 			}
