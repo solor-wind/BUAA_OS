@@ -334,8 +334,10 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			else
 			{
 				*post|=2;
-				//argv[0]=t;
-				return parsecmd(argv, rightpipe,post);
+				close_all();
+				exit();
+				// argv[0]="";
+				// return parsecmd(argv, rightpipe,post);
 			}
 			break;	
 		}
