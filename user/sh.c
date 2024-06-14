@@ -3,6 +3,11 @@
 
 #define WHITESPACE " \t\r\n"
 #define SYMBOLS "<|>&;()"
+#define HISTFILESIZE 20
+int hist;//该写哪条指令了
+char histcmd[HISTFILESIZE][1024];
+int lasthist=-1;//上一条指令在哪
+char lastcmd[1024];//当前指令
 
 void runcmd(char* s);
 /* Overview:
@@ -180,7 +185,7 @@ int parsecmd(char **argv, int *rightpipe) {
 				}
 				fd=open(t,O_RWR|O_WRONLY);
 			}else{
-				fd=open(t,O_WRONLY);
+				fd=open(t,O_WRONLY|O_TRUNC);
 			}
 			if(fd<0)
 			{
@@ -263,6 +268,14 @@ void runcmd(char *s) {
 	}
 	argv[argc] = 0;
 
+	if(strcmp(argv[0],"history")==0){
+		int f=open(".mosh_history",O_RDONLY);
+		char tmp[10240];
+		readn(f,tmp,10240);
+		printf("%s\n",tmp);
+		exit();
+	}
+
 	int child = spawn(argv[0], argv);
 	close_all();
 	if (child >= 0) {
@@ -299,6 +312,85 @@ void readline(char *buf, u_int n) {
 			buf[i] = 0;
 			return;
 		}
+		if(i>=2&&buf[i-2]==27&&buf[i-1]==91&&buf[i]==65){
+			i-=2;
+			printf("%c%c%c",27,91,66);
+			for(int j=0;j<i;j++){
+				printf("\b \b");
+			}
+			if(lasthist==-1){
+				strcpy(lastcmd,buf);
+				lastcmd[i]='\0';
+			}
+			if(lasthist==-1){
+				if(hist==0){
+					if(histcmd[HISTFILESIZE-1][0]!='\0'){
+						lasthist=HISTFILESIZE-1;
+					}else{
+						lasthist=0;//已经是最前面的指令
+					}
+				}else{
+					lasthist=hist-1;
+				}
+			}else{
+				if(lasthist==0&&histcmd[HISTFILESIZE-1][0]=='\0'){
+					;//已经是最前面的指令
+				}else{
+					if(lasthist==hist){
+						;//已经是最前面的指令
+					}else{
+						lasthist--;
+						if(lasthist<0){
+							lasthist=HISTFILESIZE-1;
+						}
+					}
+				}
+			}
+			strcpy(buf,histcmd[lasthist]);
+			if(buf[strlen(buf)-1]=='\n'){
+				buf[strlen(buf)-1]='\0';
+			}
+			printf("%s", buf);
+			i=strlen(buf)-1;
+			continue;
+		}
+		else if(i>=2&&buf[i-2]==27&&buf[i-1]==91&&buf[i]==66){
+			i-=2;
+			//printf("%c%c%c",27,91,65);
+			for(int j=0;j<i;j++){
+				printf("\b \b");
+			}
+			if(lasthist==-1){
+				strcpy(lastcmd,buf);
+				lastcmd[i]='\0';
+			}
+			if(lasthist==-1){
+				lasthist==-2;
+			}else{
+				if((hist==0&&lasthist==HISTFILESIZE-1)||(hist&&lasthist==hist-1)){
+					lasthist=-2;
+				}else{
+					lasthist++;
+					if(lasthist>=HISTFILESIZE){
+						lasthist=0;
+					}
+					if(histcmd[lasthist][0]=='\0'){
+						lasthist=-2;
+					}
+				}
+			}
+			if(lasthist<0){
+				strcpy(buf,lastcmd);
+			}else{
+				strcpy(buf,histcmd[lasthist]);
+			}
+			if(buf[strlen(buf)-1]=='\n'){
+				buf[strlen(buf)-1]='\0';
+			}
+			printf("%s", buf);
+			i=strlen(buf)-1;
+			continue;
+		}
 	}
 	debugf("line too long\n");
 	while ((r = read(0, buf, 1)) == 1 && buf[0] != '\r' && buf[0] != '\n') {
@@ -312,6 +404,66 @@ char buf[1024];
 void usage(void) {
 	printf("usage: sh [-ix] [script-file]\n");
 	exit();
+}
+
+void wirte_history(){
+	int tmpflag=0;
+	for(int i=0;buf[i];i++){
+		if(buf[i]!='\t'||buf[i]!='\r'||buf[i]!='\n'){
+			tmpflag=1;
+		}
+	}
+	if(!tmpflag){
+		return;
+	}
+
+	int f=open(".mosh_history",O_RDONLY);
+	if(f<0){
+		f=open(".mosh_history",O_CREAT);
+	}
+	close(f);
+
+	if(hist<HISTFILESIZE&&histcmd[hist][0]=='\0'){//还没满
+		f=open(".mosh_history",O_RWR|O_WRONLY);
+		strcpy(histcmd[hist],buf);
+		int len=strlen(buf);
+		histcmd[hist][len]='\n';
+		histcmd[hist][len+1]='\0';
+		write(f,histcmd[hist],strlen(histcmd[hist]));
+		close(f);
+		hist++;
+		if(hist==HISTFILESIZE){
+			hist=0;
+		}
+	}
+	else{
+		strcpy(histcmd[hist],buf);
+		int len=strlen(buf);
+		histcmd[hist][len]='\n';
+		histcmd[hist][len+1]='\0';
+
+		f=open(".mosh_history",O_WRONLY|O_TRUNC);
+		hist++;
+		if(hist==HISTFILESIZE){
+			hist=0;
+		}
+		int flag=hist;
+		write(f,histcmd[hist],strlen(histcmd[hist]));
+		close(f);
+		f=open(".mosh_history",O_RWR|O_WRONLY);
+		while(1){
+			hist++;
+			if(hist==HISTFILESIZE){
+				hist=0;
+			}
+			if(hist==flag){
+				break;
+			}
+			write(f,histcmd[hist],strlen(histcmd[hist]));
+		}
+	}
+	lasthist=-1;
+	lastcmd[0]='\0';
 }
 
 int main(int argc, char **argv) {
@@ -349,7 +501,16 @@ int main(int argc, char **argv) {
 		if (interactive) {
 			printf("\n$ ");
 		}
+		// while(read(0,buf,sizeof buf)<0);
+		// if(buf[0]==27&&buf[1]==91&&buf[2]==65){
+		// 	printf("%c%c%c", 27, 91, 66);
+		// 	printf("\b \b");
+		// 	printf("ok\n");
+		// 	continue;
+		// }
 		readline(buf, sizeof buf);
+		
+		wirte_history();
 
 		if (buf[0] == '#') {
 			continue;
