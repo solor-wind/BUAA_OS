@@ -29,6 +29,7 @@ enum {
 	SYS_get_jobs,
 	SYS_print_jobs,
 	SYS_mykill,
+	SYS_env_set_return_value,
 	MAX_SYSNO,
 };
 

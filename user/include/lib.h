@@ -76,6 +76,7 @@ int syscall_get_job_envid(int job_id);
 int syscall_get_jobs(struct Job usrjobs[]);
 int syscall_print_jobs();
 int syscall_mykill(u_int envid);
+int syscall_env_set_return_value(u_int envid,int value,int isreceived);
 
 // ipc.c
 void ipc_send(u_int whom, u_int val, const void *srcva, u_int perm);

@@ -131,6 +131,9 @@ int gettoken(char *s, char **p1) {
 int parsecmd(char **argv, int *rightpipe,int* post) {
 	int argc = 0;
 	int dupflag=0;
+	if((*post)&2){
+		argc=1;
+	}
 	while (1) {
 		char *t;
 		int fd, r;
@@ -219,6 +222,37 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			 * - close the read end of the pipe
 			 * - and 'return argc', to execute the left of the pipeline.
 			 */
+			ch=gettoken(0, &t);
+			if (ch == '|') {
+				if(dupflag){
+					dup(0,1);
+				}else{
+					dup(1,0);
+				}
+				r=fork();
+				*rightpipe=r;
+				if(r==0)
+				{
+					return argc;
+				}
+				else
+				{
+					wait(r);
+					int value=env->env_return_value;
+					if(value)
+						return parsecmd(argv, rightpipe,post);
+					else
+					{
+						close_all();
+						exit();
+					}
+				}
+			}
+			if(ch!='w'){
+				debugf("syntax error: > can't open file\n");
+				close_all();
+				exit();
+			}
 			int p[2];
 			/* Exercise 6.5: Your code here. (3/3) */
 			pipe(p);
@@ -229,6 +263,8 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 				dup(p[0],0);
 				close(p[0]);
 				close(p[1]);
+				*post|=2;
+				argv[0]=t;
 				return parsecmd(argv, rightpipe,post);
 			}
 			else
@@ -254,7 +290,7 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			{
 				wait(r);
 				if(dupflag){
-				dup(0,1);
+					dup(0,1);
 				}else{
 					dup(1,0);
 				}
@@ -262,15 +298,43 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			}
 			break;
 		case '&':
+			ch=gettoken(0, &t);
+			if (ch == '&') {
+				if(dupflag){
+					dup(0,1);
+				}else{
+					dup(1,0);
+				}
+				r=fork();
+				*rightpipe=r;
+				if(r==0)
+				{
+					return argc;
+				}
+				else
+				{
+					wait(r);
+					int value=env->env_return_value;
+					if(!value)
+						return parsecmd(argv, rightpipe,post);
+					else
+					{
+						close_all();
+						exit();
+					}
+				}
+			}
 			r=fork();
 			*rightpipe=r;
 			if(r==0)
 			{
-				*post=1;
+				*post|=1;
 				return argc;
 			}
 			else
 			{
+				*post|=2;
+				//argv[0]=t;
 				return parsecmd(argv, rightpipe,post);
 			}
 			break;	
@@ -343,7 +407,7 @@ void runcmd(char *s) {
 	}
 
 	int child = spawn(argv[0], argv);
-	if(child>0&&*post){
+	if(child>0&&((*post)&1)){
 		char tmp[1024];
 		int len=0;
 		for(int i=0;i<argc;i++){

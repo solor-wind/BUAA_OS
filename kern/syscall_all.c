@@ -571,6 +571,14 @@ int sys_mykill(u_int envid) {
 	//return mykill(envid);
 }
 
+int sys_env_set_return_value(u_int envid,int value,int isreceived){
+	struct Env* e;
+	try(envid2env(envid, &e, 0));
+	e->env_return_value=value;
+	e->env_isreceived=isreceived;
+	return 0;
+}
+
 void *syscall_table[MAX_SYSNO] = {
     [SYS_putchar] = sys_putchar,
     [SYS_print_cons] = sys_print_cons,
@@ -597,6 +605,7 @@ void *syscall_table[MAX_SYSNO] = {
 	[SYS_get_jobs] = sys_get_jobs,
 	[SYS_print_jobs] = sys_print_jobs,
 	[SYS_mykill] = sys_mykill,
+	[SYS_env_set_return_value] = sys_env_set_return_value,
 };
 
 /* Overview:

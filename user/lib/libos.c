@@ -20,7 +20,8 @@ void libmain(int argc, char **argv) {
 	env = &envs[ENVX(syscall_getenvid())];
 
 	// call user main routine
-	main(argc, argv);
+	int r=main(argc, argv);	
+	r=syscall_env_set_return_value(envs[ENVX(env->env_parent_id)].env_parent_id,r,1);
 
 	int job_id=syscall_get_job(env->env_id);
 	if(job_id>0){

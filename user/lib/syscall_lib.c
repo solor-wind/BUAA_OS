@@ -104,3 +104,7 @@ int syscall_print_jobs() {
 int syscall_mykill(u_int envid) {
 	return msyscall(SYS_mykill,envid);
 }
+
+int syscall_env_set_return_value(u_int envid,int value,int isreceived) {
+	return msyscall(SYS_env_set_return_value,envid,value,isreceived);
+}
