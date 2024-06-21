@@ -442,7 +442,13 @@ void runcmd(char *s) {
 			}
 		}
 		int envid=syscall_get_job_envid(job_id);
-		wait(envid);
+		if(envid>=0)
+			wait(envid);
+		else if(envid==-1){
+			printf("fg: job (%d) do not exist\n", job_id);
+		}else{
+			printf("fg: (0x%08x) not running\n", envid&(0x80000000-1));
+		}
 		close_all();
 		exit();
 	}else if(strcmp(argv[0],"kill")==0){
@@ -454,8 +460,14 @@ void runcmd(char *s) {
 			}
 		}
 		int envid=syscall_get_job_envid(job_id);
-		syscall_set_job_status(job_id,Done);
-		syscall_mykill(envid);
+		if(envid>=0){
+			syscall_set_job_status(job_id,Done);
+			syscall_mykill(envid);
+		}else if(envid==-1){
+			printf("kill: job (%d) do not exist\n", job_id);
+		}else{
+			printf("kill: (0x%08x) not running\n", envid&(0x80000000-1));
+		}
 		//printf("%d\n",envid);
 		// if(syscall_mykill(envid)<0)
 		// printf("not ok\n");

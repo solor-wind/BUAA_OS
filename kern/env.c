@@ -635,6 +635,9 @@ int get_job(int envid){
 
 int get_job_envid(int job_id){
 	if(job_id>0&&job_id<=job_cnt){
+		if(jobs[job_id].status!=Running){
+			return jobs[job_id].env_id|0x80000000;
+		}
 		return jobs[job_id].env_id;
 	}else{
 		return -1;
