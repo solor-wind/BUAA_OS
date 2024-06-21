@@ -91,6 +91,7 @@ int add_job(int envid,char cmd[]);
 int set_job_status(int job_id,int status);
 int get_job(int envid);
 int get_job_envid(int job_id);
+int get_job_status(int job_id);
 int get_jobs(struct Job usrjobs[]);
 int print_jobs();
 

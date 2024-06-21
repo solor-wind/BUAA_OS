@@ -73,6 +73,7 @@ int syscall_add_job(int envid,char cmd[]);
 int syscall_set_job_status(int job_id,int status);
 int syscall_get_job(int envid);
 int syscall_get_job_envid(int job_id);
+int syscall_get_job_status(int job_id);
 int syscall_get_jobs(struct Job usrjobs[]);
 int syscall_print_jobs();
 int syscall_mykill(u_int envid);

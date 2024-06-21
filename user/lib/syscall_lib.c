@@ -93,6 +93,10 @@ int syscall_get_job_envid(int job_id) {
 	return msyscall(SYS_get_job_envid,job_id);
 }
 
+int syscall_get_job_status(int job_id) {
+	return msyscall(SYS_get_job_status,job_id);
+}
+
 int syscall_get_jobs(struct Job usrjobs[]) {
 	return msyscall(SYS_get_jobs,usrjobs);
 }

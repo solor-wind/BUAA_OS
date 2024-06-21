@@ -553,6 +553,10 @@ int sys_get_job_envid(int job_id){
 	return get_job_envid(job_id);
 }
 
+int sys_get_job_status(int job_id){
+	return get_job_status(job_id);
+}
+
 int sys_get_jobs(struct Job usrjobs[]){
 	return get_jobs(usrjobs);
 }
@@ -602,6 +606,7 @@ void *syscall_table[MAX_SYSNO] = {
 	[SYS_set_job_status] = sys_set_job_status,
 	[SYS_get_job] = sys_get_job,
 	[SYS_get_job_envid] = sys_get_job_envid,
+	[SYS_get_job_status] = sys_get_job_status,
 	[SYS_get_jobs] = sys_get_jobs,
 	[SYS_print_jobs] = sys_print_jobs,
 	[SYS_mykill] = sys_mykill,

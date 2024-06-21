@@ -26,6 +26,7 @@ enum {
 	SYS_set_job_status,
 	SYS_get_job,
 	SYS_get_job_envid,
+	SYS_get_job_status,
 	SYS_get_jobs,
 	SYS_print_jobs,
 	SYS_mykill,
