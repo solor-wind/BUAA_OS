@@ -464,13 +464,13 @@ void runcmd(char *s) {
 		int envid=syscall_get_job_envid(job_id);
 		if(envid!=-1){
 			if(syscall_get_job_status(job_id)!=Running){
-				printf("kill: (0x%08x) not running\n", envid);
+				printf("fg: (0x%08x) not running\n", envid);
 			}else{
 				syscall_set_job_status(job_id,Done);
 				syscall_mykill(envid);
 			}
 		}else{
-			printf("kill: job (%d) do not exist\n", job_id);
+			printf("fg: job (%d) do not exist\n", job_id);
 		}
 		//printf("%d\n",envid);
 		// if(syscall_mykill(envid)<0)
