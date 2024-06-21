@@ -372,11 +372,11 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 					}
 				}
 			}
-			if(ch!=0){
-				debugf("syntax error: &?\n");
-				close_all();
-				exit();
-			}
+			// if(ch!=0){
+			// 	debugf("syntax error: &?\n");
+			// 	close_all();
+			// 	exit();
+			// }
 			r=fork();
 			*rightpipe=r;
 			if(r==0)
