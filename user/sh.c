@@ -8,6 +8,7 @@ int hist;//该写哪条指令了
 char histcmd[HISTFILESIZE][1024];
 int lasthist=-1;//上一条指令在哪
 char lastcmd[1024];//当前指令
+char strjob[1024];
 
 struct Job usrjobs[MAXJOB+1];
 
@@ -463,15 +464,15 @@ void runcmd(char *s) {
 
 	int child = spawn(argv[0], argv);
 	if(child>0&&((*post)&1)){
-		char tmp[1024];
-		int len=0;
-		for(int i=0;i<argc;i++){
-			strcpy(tmp+len,argv[i]);
-			len+=strlen(argv[i]);
-			tmp[len++]=' ';
-			tmp[len]='\0';
-		}
-		syscall_add_job(child,tmp);
+		// char tmp[1024];
+		// int len=0;
+		// for(int i=0;i<argc;i++){
+		// 	strcpy(tmp+len,argv[i]);
+		// 	len+=strlen(argv[i]);
+		// 	tmp[len++]=' ';
+		// 	tmp[len]='\0';
+		// }
+		syscall_add_job(child,strjob);
 	}
 	// int job_id=syscall_get_job(env->env_id);
 	// if(job_id>0){
@@ -710,6 +711,7 @@ int main(int argc, char **argv) {
 		// 	continue;
 		// }
 		readline(buf, sizeof buf);
+		strcpy(strjob,buf);
 		
 		wirte_history();
 
