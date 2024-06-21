@@ -260,13 +260,13 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 								exit();
 							}else if(ch=='&'){
 								ch=gettoken(0, &t);
-								if(ch!='&'&&ch!=';'){
+								if(ch!='&'/*&&ch!=';'*/){
 									continue;
 								}
 								return parsecmd(argv, rightpipe,post);
-							}else if(ch==';'){
+							}/*else if(ch==';'){
 								return parsecmd(argv, rightpipe,post);
-							}
+							}*/
 						}
 					}
 				}
