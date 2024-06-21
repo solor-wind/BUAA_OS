@@ -455,6 +455,7 @@ void runcmd(char *s) {
 		}
 		int envid=syscall_get_job_envid(job_id);
 		syscall_set_job_status(job_id,Done);
+		syscall_mykill(envid);
 		//printf("%d\n",envid);
 		// if(syscall_mykill(envid)<0)
 		// printf("not ok\n");
