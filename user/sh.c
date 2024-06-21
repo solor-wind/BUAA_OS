@@ -329,7 +329,7 @@ int parsecmd(char **argv, int *rightpipe,int* post) {
 			// 	exit();
 			// }
 			// else
-			// 	*post&=~4;//
+			// 	*post&=~4;//;
 			if (ch == '&') {
 				// if(dupflag){
 				// 	dup(0,1);
